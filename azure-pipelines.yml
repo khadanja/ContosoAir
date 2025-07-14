@@ -36,3 +36,4 @@ steps:
     inputs:
       SourceFolder: deployment
       Contents: '*.json'
+      TargetFolder: '$(Build.ArtifactStagingDirectory)/templates'
