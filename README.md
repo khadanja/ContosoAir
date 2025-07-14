@@ -1,4 +1,4 @@
-[![Build Status](https://dev.azure.com/mlakhan/ContosoAir/_apis/build/status%2Fkhadanja.ContosoAir?branchName=master)
+[![Build Status](https://dev.azure.com/mlakhan/ContosoAir/_apis/build/status%2Fkhadanja.ContosoAir?branchName=master)]
 
 # This project is retired, archived, and no longer supported. You are welcome to continue to use and fork the repository.
 
