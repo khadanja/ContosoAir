@@ -4,7 +4,7 @@ trigger:
 steps:
   - task: Npm@1
     inputs:
-      command: 'ci'  # faster and more reliable for CI
+      command: 'install'  # faster and more reliable for CI
 
   - script: |
       npm test
