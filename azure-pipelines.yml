@@ -1,39 +1,55 @@
 trigger:
   - master
 
-steps:
-  - task: Npm@1
-    inputs:
-      command: 'install'  # faster and more reliable for CI
+jobs:
+  - job: BuildAndTest
+    steps:
+      - task: Npm@1
+        inputs:
+          command: 'install'  # Faster and more reliable for CI
 
-  - script: |
-      npm test
-    displayName: 'Run unit tests'
-    continueOnError: true
+      - script: |
+          npm test
+        displayName: 'Run unit tests'
+        continueOnError: true
 
-  - task: PublishTestResults@2
-    displayName: 'Publish Test Results'
-    condition: succeededOrFailed()
-    inputs:
-      testResultsFiles: $(System.DefaultWorkingDirectory)/test-report.xml
+      - task: PublishTestResults@2
+        displayName: 'Publish Test Results'
+        condition: succeededOrFailed()
+        inputs:
+          testResultsFiles: $(System.DefaultWorkingDirectory)/test-report.xml
 
-  - task: PublishCodeCoverageResults@1
-    displayName: 'Publish Code Coverage'
-    condition: 'in(variables[''Agent.JobStatus''], ''Succeeded'')'
-    inputs:
-      codeCoverageTool: Cobertura
-      summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/*coverage.xml'
-      reportDirectory: $(System.DefaultWorkingDirectory)/coverage
+      - task: PublishCodeCoverageResults@1
+        displayName: 'Publish Code Coverage'
+        condition: 'in(variables[''Agent.JobStatus''], ''Succeeded'')'
+        inputs:
+          codeCoverageTool: Cobertura
+          summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/*coverage.xml'
+          reportDirectory: $(System.DefaultWorkingDirectory)/coverage
 
-  - task: ArchiveFiles@2
-    displayName: 'Archive sources'
-    inputs:
-      rootFolderOrFile: $(Build.SourcesDirectory)
-      includeRootFolder: false
+      - task: ArchiveFiles@2
+        displayName: 'Archive sources'
+        inputs:
+          rootFolderOrFile: $(Build.SourcesDirectory)
+          includeRootFolder: false
 
-  - task: CopyFiles@2
-    displayName: 'Copy ARM templates'
-    inputs:
-      SourceFolder: deployment
-      Contents: '*.json'
-      TargetFolder: '$(Build.ArtifactStagingDirectory)/templates'
+      - task: CopyFiles@2
+        displayName: 'Copy ARM templates'
+        inputs:
+          SourceFolder: deployment
+          Contents: '*.json'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/templates'
+
+  - job: DeployToEnvironment
+    dependsOn: BuildAndTest
+    condition: succeeded()
+    environment:
+      name: 'my-environment'  # Set your environment name here
+      # resourceType: 'VirtualMachine'  # Optional, if you need environment details
+      action: 'Create'  # Will still target an environment but doesn't deploy to Azure
+
+    steps:
+      - script: |
+          echo "Deploying to environment: my-environment"
+          # You can include additional deployment scripts here for non-Azure deployments
+        displayName: 'Simulate Deployment to Environment'
